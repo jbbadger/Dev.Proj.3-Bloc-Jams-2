@@ -17,11 +17,13 @@ class Album extends Component {
        isPlaying: false,
        isHovered: false,
        currentTime: 0,
-       duration: album.songs[0].duration
+       duration: album.songs[0].duration,
+       volume: 0.5
      };
 
      this.audioElement = document.createElement('audio');
      this.audioElement.src = album.songs[0].audioSrc;
+     this.audioElement.volume = this.state.volume;
   }
 
 play() {
@@ -114,6 +116,35 @@ handleTimeChange(e) {
   this.setState({ currentTime: newTime });
 }
 
+handleVolumeChange(e) {
+  const newVolume = e.target.value;
+  this.audioElement.volume = newVolume;
+  this.setState({ volume: newVolume});
+}
+
+handleVolumeInc(e) {
+  const volume = this.state.volume;
+  const stepRate = 0.05;
+  const newVolume = Math.min(1, (volume + stepRate));
+  this.audioElement.volume = newVolume;
+  this.setState({ volume: newVolume })
+}
+
+handleVolumeDec(e) {
+  const volume = this.state.volume;
+  const stepRate = 0.05;
+  const newVolume = Math.max(0, (volume - stepRate));
+  this.audioElement.volume = newVolume;
+  this.setState({ volume: newVolume });
+}
+
+formatTime(time){
+  const min = parseInt(time / 60);
+  const sec = Math.round(time % 60);
+  if(isNaN(time)){ return "-:--"};
+  return ( sec < 10 ? `${min}:0${sec}` : `${min}:${sec}`);
+}
+
 
 
   render() {
@@ -144,7 +175,7 @@ handleTimeChange(e) {
                     onClick={() => this.handleSongClick(song)}
                     onMouseEnter={() => this.handleEnter(song)}
                     onMouseLeave={() => this.handleLeave()}>{ song.title }</td>
-                <td key={index}>{ song.duration }</td>
+                <td key={index}>{ this.formatTime(song.duration) }</td>
               </tr>
               )}
            </tbody>
@@ -158,6 +189,10 @@ handleTimeChange(e) {
             currentTime={this.audioElement.currentTime}
             duration={this.audioElement.duration}
             handleTimeChange={(e) => this.handleTimeChange(e)}
+            handleVolumeChange={(e) => this.handleVolumeChange(e)}
+            handleVolumeInc={(e) => this.handleVolumeInc(e)}
+            handleVolumeDec={(e) => this.handleVolumeDec(e)}
+            formatTime = {(time) => this.formatTime(time)}
             />
       </section>
     );
